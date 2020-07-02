@@ -28,6 +28,9 @@ func Handle(l zerolog.Logger, w http.ResponseWriter, r *http.Request, err error)
 	var e errs.E
 	errors.As(err, &e)
 
+	// @@@ This is too low in the error chain
+	l.Err(err).Send()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStatus[e.Kind])
 	_ = json.NewEncoder(w).Encode(errResp{

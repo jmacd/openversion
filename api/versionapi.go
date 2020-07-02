@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,6 +42,7 @@ func (api versionAPI) newVersion(w http.ResponseWriter, r *http.Request) {
 	var app version.Application
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
+		fmt.Println("HAPPENING?0", err)
 		errshttp.Handle(api.logger, w, r, errs.E{
 			Kind:    errs.KindParameterErr,
 			Wrapped: err,
@@ -50,6 +52,7 @@ func (api versionAPI) newVersion(w http.ResponseWriter, r *http.Request) {
 
 	err = api.svc.Add(r.Context(), &app)
 	if err != nil {
+		fmt.Println("HAPPENING?1", err)
 		errshttp.Handle(api.logger, w, r, err)
 		return
 	}
@@ -62,6 +65,7 @@ func (api versionAPI) getVersion(w http.ResponseWriter, r *http.Request) {
 
 	app, err := api.svc.Get(r.Context(), chi.URLParam(r, "appid"))
 	if err != nil {
+		fmt.Println("HAPPENING?2", err)
 		errshttp.Handle(api.logger, w, r, err)
 		return
 	}
@@ -76,6 +80,7 @@ func (api versionAPI) updateVersion(w http.ResponseWriter, r *http.Request) {
 	var app version.Application
 	err := json.NewDecoder(r.Body).Decode(&app)
 	if err != nil {
+		fmt.Println("HAPPENING?3", err)
 		errshttp.Handle(api.logger, w, r, errs.E{
 			Wrapped: err,
 		})
@@ -93,6 +98,7 @@ func (api versionAPI) updateVersion(w http.ResponseWriter, r *http.Request) {
 
 	err = api.svc.UpdateVersion(r.Context(), app)
 	if err != nil {
+		fmt.Println("HAPPENING?4", err)
 		errshttp.Handle(api.logger, w, r, err)
 		return
 	}
@@ -110,6 +116,7 @@ func (api versionAPI) listVersions(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := api.svc.List(r.Context(), lim)
 	if err != nil {
+		fmt.Println("HAPPENING?5", err)
 		errshttp.Handle(api.logger, w, r, err)
 		return
 	}

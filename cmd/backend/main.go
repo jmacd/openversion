@@ -18,14 +18,18 @@ import (
 )
 
 const (
-	postgreConnStr string = "postgres://postgres:roottoor@db:5432/backend"
-	redisConnStr   string = "redis:6379"
+	postgreConnStr string = "postgres://postgres:roottoor@127.0.0.1:5432/backend"
+	redisConnStr   string = "127.0.0.1:6379"
 	serverAddr     string = ":8088"
 )
 
 func initService(ctx context.Context, logger zerolog.Logger) version.Service {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
 	tracer := global.Tracer("service")
 	meter := global.Meter("service")
+
 	versionStore, err := versionpostgre.New(
 		ctx,
 		postgreConnStr,
@@ -59,8 +63,14 @@ func initService(ctx context.Context, logger zerolog.Logger) version.Service {
 func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
-	logger := zerolog.New(zerolog.NewConsoleWriter()).Level(zerolog.DebugLevel)
+	defer cancel()
+
+	logWriter := zerolog.NewConsoleWriter()
+	logWriter.NoColor = true
+	logger := zerolog.New(logWriter).Level(zerolog.DebugLevel)
+
 	versionSvc := initService(ctx, logger)
+
 	defer initProviders().Stop()
 
 	g, ctx := errgroup.WithContext(ctx)
@@ -79,5 +89,7 @@ func main() {
 		return err
 	})
 
-	g.Wait()
+	if err := g.Wait(); err != nil {
+		logger.Err(err).Msg("server error")
+	}
 }

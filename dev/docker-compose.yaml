@@ -27,14 +27,14 @@ services:
       - db 
       - redis   
     ports: 
-      - "8088:8088"
+      - "8089:8088"
 
   otel-collector:
     image: ${OTELCOL_IMG}
     command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-      - /Users/zeyad/gs.json:/etc/gs.json
+#      - /Users/zeyad/gs.json:/etc/gs.json
     environment:
         - GOOGLE_APPLICATION_CREDENTIALS=/etc/gs.json    
     ports:

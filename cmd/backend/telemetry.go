@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -13,9 +14,9 @@ import (
 )
 
 func initProviders() *push.Controller {
-	collectorAddr, ok := os.LookupEnv("OTEL_RECIEVER_ENDPOINT")
+	collectorAddr, ok := os.LookupEnv("OTEL_RECEIVER_ENDPOINT")
 	if !ok {
-		collectorAddr = otlp.DefaultCollectorHost + ":" + string(otlp.DefaultCollectorHost)
+		collectorAddr = fmt.Sprint(otlp.DefaultCollectorHost, ":", otlp.DefaultCollectorPort)
 	}
 	exporter, err := otlp.NewExporter(otlp.WithAddress(collectorAddr), otlp.WithInsecure())
 
@@ -32,7 +33,7 @@ func initProviders() *push.Controller {
 	global.SetTraceProvider(tp)
 
 	pusher := push.New(
-		simple.NewWithExactDistribution(),
+		simple.NewWithInexpensiveDistribution(),
 		exporter,
 		push.WithPeriod(2*time.Second),
 	)
